@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "data-factory-dev-manoj"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"value": ""
+		},
+		"link_Cloud_File_System_connectionString": {
+			"value": ""
+		},
+		"link_File_System_password": {
+			"value": ""
+		},
+		"link_File_System_properties_typeProperties_host": {
+			"value": "@{linkedService().sourcefolderName}"
+		},
+		"link_File_System_properties_typeProperties_userId": {
+			"value": "desktop-6dad0pi\\manoj"
+		}
+	}
+}

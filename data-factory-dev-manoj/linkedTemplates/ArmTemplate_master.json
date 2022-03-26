@@ -1,0 +1,77 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "data-factory-dev-manoj"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
+		"link_Cloud_File_System_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'link_Cloud_File_System'"
+		},
+		"link_File_System_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'link_File_System'"
+		},
+		"link_File_System_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().sourcefolderName}"
+		},
+		"link_File_System_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "desktop-6dad0pi\\manoj"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "data-factory-dev-manoj_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureSqlDatabase1_connectionString": {
+						"value": "[parameters('AzureSqlDatabase1_connectionString')]"
+					},
+					"link_Cloud_File_System_connectionString": {
+						"value": "[parameters('link_Cloud_File_System_connectionString')]"
+					},
+					"link_File_System_password": {
+						"value": "[parameters('link_File_System_password')]"
+					},
+					"link_File_System_properties_typeProperties_host": {
+						"value": "[parameters('link_File_System_properties_typeProperties_host')]"
+					},
+					"link_File_System_properties_typeProperties_userId": {
+						"value": "[parameters('link_File_System_properties_typeProperties_userId')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

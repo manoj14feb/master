@@ -1,0 +1,981 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "data-factory-dev-manoj"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
+		"link_Cloud_File_System_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'link_Cloud_File_System'"
+		},
+		"link_File_System_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'link_File_System'"
+		},
+		"link_File_System_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().sourcefolderName}"
+		},
+		"link_File_System_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "desktop-6dad0pi\\manoj"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/link_Cloud_File_System')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "link_Cloud_File_System",
+				"annotations": [
+					"Linked service for cloud file system"
+				],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('link_Cloud_File_System_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/on-prem-ir-manoj')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "on-prem-ir-manoj",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_Cloud_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "link_Cloud_File_System",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"sourceFileName": {
+						"type": "string",
+						"defaultValue": "abc"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().sourceFileName",
+							"type": "Expression"
+						},
+						"container": "import-folder"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/link_Cloud_File_System')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_Cloud_Folder')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "link_Cloud_File_System",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "import-folder"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/link_Cloud_File_System')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_gwbs_level')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "link_Cloud_File_System",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "gwbs-level.csv",
+						"container": "import-folder"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "GWBSLevel",
+						"type": "String"
+					},
+					{
+						"name": "GWBSLabel",
+						"type": "String"
+					},
+					{
+						"name": "ProjectId",
+						"type": "String"
+					},
+					{
+						"name": "CreatedBy",
+						"type": "String"
+					},
+					{
+						"name": "CreatedOn",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/link_Cloud_File_System')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_gwbs_level_sql')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "GWBSId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "GWBSLevel",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "GWBSLabel",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProjectId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CreatedBy",
+						"type": "varchar"
+					},
+					{
+						"name": "CreatedOn",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "RecordStatus",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "GW00_GWBSLevel"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_output')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "link_Cloud_File_System",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "export-folder"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/link_Cloud_File_System')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sink_ds_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "link_Cloud_File_System",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "apicall",
+						"container": "export-folder"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/link_Cloud_File_System')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/snk_table')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "salesid",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "order_number",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "order_date",
+						"type": "date"
+					},
+					{
+						"name": "order_amount",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "srno",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "sales"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/source_ds_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "link_Cloud_File_System",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "sales.csv",
+						"container": "import-folder"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "salesid",
+						"type": "String"
+					},
+					{
+						"name": "order_number",
+						"type": "String"
+					},
+					{
+						"name": "order_date",
+						"type": "String"
+					},
+					{
+						"name": "order_amount",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/link_Cloud_File_System')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/link_File_System')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "link_File_System",
+				"parameters": {
+					"sourcefolderName": {
+						"type": "string"
+					}
+				},
+				"annotations": [
+					"on-prem linked service"
+				],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('link_File_System_properties_typeProperties_host')]",
+					"userId": "[parameters('link_File_System_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('link_File_System_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "on-prem-ir-manoj",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/on-prem-ir-manoj')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_latest_file')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "pipeline_latest_file",
+				"activities": [
+					{
+						"name": "Get Metadata for all files in Folder",
+						"description": "Get Metadata for all files in Folder",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_Cloud_Folder",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata for all files in Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata for all files in Folder').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Get Metadata of name passed",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ds_Cloud_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"sourceFileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"fieldList": [
+											"lastModified",
+											"itemName"
+										],
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Metadata of name passed",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@greater(formatDateTime(activity('Get Metadata of name passed').output.lastModified,'yyyyMMddHHMS'),\nformatDateTime(variables('var_lastModifiedDate'),'yyyyMMddHHMS'))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Set variable fileName latest file",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "var_fileName",
+													"value": {
+														"value": "@activity('Get Metadata of name passed').output.itemName",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "Set variable for setting lastModifiedDate",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "If Condition1",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_lastModifiedDate",
+										"value": {
+											"value": "@formatDateTime(activity('Get Metadata of name passed').output.lastModified) ",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Copy latest file",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "ForEach",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_Cloud_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"sourceFileName": {
+										"value": "@variables('var_fileName')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_output",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"var_lastModifiedDate": {
+						"type": "String",
+						"defaultValue": "2000-03-03T17:45:53Z"
+					},
+					"var_fileName": {
+						"type": "String"
+					}
+				},
+				"annotations": [
+					"pipeline_latest_file"
+				],
+				"lastPublishTime": "2022-03-08T17:10:04Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_Cloud_Folder')]",
+				"[concat(variables('factoryId'), '/datasets/ds_Cloud_File')]",
+				"[concat(variables('factoryId'), '/datasets/ds_output')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_load_csv_to_blob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "pipeline_load_csv_to_blob",
+				"activities": [
+					{
+						"name": "Load CSV file to BLOB",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "source_ds_csv",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sink_ds_csv",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-03-10T17:55:37Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/source_ds_csv')]",
+				"[concat(variables('factoryId'), '/datasets/sink_ds_csv')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/scd2')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_gwbs_level",
+								"type": "DatasetReference"
+							},
+							"name": "sourceGwbsLevel"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_gwbs_level_sql",
+								"type": "DatasetReference"
+							},
+							"name": "sourceSQL"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_gwbs_level_sql",
+								"type": "DatasetReference"
+							},
+							"name": "sinkGwbslevelSQL"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_gwbs_level_sql",
+								"type": "DatasetReference"
+							},
+							"name": "sinkSQLUpdate"
+						}
+					],
+					"transformations": [
+						{
+							"name": "RecordStatus"
+						},
+						{
+							"name": "lookupSQL"
+						},
+						{
+							"name": "filterSQLRowsOnly"
+						},
+						{
+							"name": "selectSQL"
+						},
+						{
+							"name": "RecrodStatusMakeAsInactive"
+						},
+						{
+							"name": "UpdateExistingRows"
+						},
+						{
+							"name": "selectSQLColsOnly"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          GWBSLevel as integer,",
+						"          GWBSLabel as string,",
+						"          ProjectId as integer,",
+						"          CreatedBy as string,",
+						"          CreatedOn as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> sourceGwbsLevel",
+						"source(output(",
+						"          GWBSId as integer,",
+						"          GWBSLevel as integer,",
+						"          GWBSLabel as string,",
+						"          ProjectId as integer,",
+						"          CreatedBy as string,",
+						"          CreatedOn as timestamp,",
+						"          RecordStatus as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceSQL",
+						"sourceGwbsLevel derive(RecordStatus = 0) ~> RecordStatus",
+						"sourceGwbsLevel, selectSQL lookup(GWBSLevel == SQL_GWBSLevel,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> lookupSQL",
+						"lookupSQL filter(!isNull(SQL_GWBSLevel)) ~> filterSQLRowsOnly",
+						"sourceSQL select(mapColumn(",
+						"          SQL_GWBSId = GWBSId,",
+						"          SQL_GWBSLevel = GWBSLevel,",
+						"          SQL_GWBSLabel = GWBSLabel,",
+						"          SQL_ProjectId = ProjectId,",
+						"          SQL_CreatedBy = CreatedBy,",
+						"          SQL_CreatedOn = CreatedOn,",
+						"          SQL_RecordStatus = RecordStatus",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectSQL",
+						"selectSQLColsOnly derive(SQL_RecordStatus = 1) ~> RecrodStatusMakeAsInactive",
+						"RecrodStatusMakeAsInactive alterRow(updateIf(1==1)) ~> UpdateExistingRows",
+						"filterSQLRowsOnly select(mapColumn(",
+						"          SQL_GWBSId,",
+						"          SQL_GWBSLevel,",
+						"          SQL_GWBSLabel,",
+						"          SQL_ProjectId,",
+						"          SQL_CreatedBy,",
+						"          SQL_CreatedOn,",
+						"          SQL_RecordStatus",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectSQLColsOnly",
+						"RecordStatus sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          GWBSId as integer,",
+						"          GWBSLevel as integer,",
+						"          GWBSLabel as string,",
+						"          ProjectId as integer,",
+						"          CreatedBy as string,",
+						"          CreatedOn as timestamp,",
+						"          RecordStatus as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          GWBSLevel,",
+						"          GWBSLabel,",
+						"          ProjectId,",
+						"          CreatedBy,",
+						"          CreatedOn,",
+						"          RecordStatus",
+						"     )) ~> sinkGwbslevelSQL",
+						"UpdateExistingRows sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          GWBSId as integer,",
+						"          GWBSLevel as integer,",
+						"          GWBSLabel as string,",
+						"          ProjectId as integer,",
+						"          CreatedBy as string,",
+						"          CreatedOn as timestamp,",
+						"          RecordStatus as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['GWBSId'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          GWBSId = SQL_GWBSId,",
+						"          GWBSLevel = SQL_GWBSLevel,",
+						"          GWBSLabel = SQL_GWBSLabel,",
+						"          ProjectId = SQL_ProjectId,",
+						"          CreatedBy = SQL_CreatedBy,",
+						"          CreatedOn = SQL_CreatedOn,",
+						"          RecordStatus = SQL_RecordStatus",
+						"     )) ~> sinkSQLUpdate"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_gwbs_level')]",
+				"[concat(variables('factoryId'), '/datasets/ds_gwbs_level_sql')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_scd2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "pipeline_scd1",
+				"activities": [
+					{
+						"name": "SCD2",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "scd2",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceGwbsLevel": {},
+									"sourceSQL": {},
+									"sinkGwbslevelSQL": {},
+									"sinkSQLUpdate": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-03-12T06:34:30Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/scd2')]"
+			]
+		}
+	]
+}

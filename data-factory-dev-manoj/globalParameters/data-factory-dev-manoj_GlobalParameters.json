@@ -1,0 +1,14 @@
+{
+	"devenv": {
+		"type": "string",
+		"value": "devenv"
+	},
+	"uatenv": {
+		"type": "string",
+		"value": "uatenv"
+	},
+	"prod": {
+		"type": "string",
+		"value": "prod"
+	}
+}
