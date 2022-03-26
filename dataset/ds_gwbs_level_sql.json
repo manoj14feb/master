@@ -1,0 +1,52 @@
+{
+	"name": "ds_gwbs_level_sql",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "GWBSId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "GWBSLevel",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "GWBSLabel",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ProjectId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CreatedBy",
+				"type": "varchar"
+			},
+			{
+				"name": "CreatedOn",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "RecordStatus",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "GW00_GWBSLevel"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

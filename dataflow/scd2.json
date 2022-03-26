@@ -1,0 +1,174 @@
+{
+	"name": "scd2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_gwbs_level",
+						"type": "DatasetReference"
+					},
+					"name": "sourceGwbsLevel"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_gwbs_level_sql",
+						"type": "DatasetReference"
+					},
+					"name": "sourceSQL"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_gwbs_level_sql",
+						"type": "DatasetReference"
+					},
+					"name": "sinkGwbslevelSQL"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_gwbs_level_sql",
+						"type": "DatasetReference"
+					},
+					"name": "sinkSQLUpdate"
+				}
+			],
+			"transformations": [
+				{
+					"name": "RecordStatus"
+				},
+				{
+					"name": "lookupSQL"
+				},
+				{
+					"name": "filterSQLRowsOnly"
+				},
+				{
+					"name": "selectSQL"
+				},
+				{
+					"name": "RecrodStatusMakeAsInactive"
+				},
+				{
+					"name": "UpdateExistingRows"
+				},
+				{
+					"name": "selectSQLColsOnly"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          GWBSLevel as integer,",
+				"          GWBSLabel as string,",
+				"          ProjectId as integer,",
+				"          CreatedBy as string,",
+				"          CreatedOn as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceGwbsLevel",
+				"source(output(",
+				"          GWBSId as integer,",
+				"          GWBSLevel as integer,",
+				"          GWBSLabel as string,",
+				"          ProjectId as integer,",
+				"          CreatedBy as string,",
+				"          CreatedOn as timestamp,",
+				"          RecordStatus as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceSQL",
+				"sourceGwbsLevel derive(RecordStatus = 0) ~> RecordStatus",
+				"sourceGwbsLevel, selectSQL lookup(GWBSLevel == SQL_GWBSLevel,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookupSQL",
+				"lookupSQL filter(!isNull(SQL_GWBSLevel)) ~> filterSQLRowsOnly",
+				"sourceSQL select(mapColumn(",
+				"          SQL_GWBSId = GWBSId,",
+				"          SQL_GWBSLevel = GWBSLevel,",
+				"          SQL_GWBSLabel = GWBSLabel,",
+				"          SQL_ProjectId = ProjectId,",
+				"          SQL_CreatedBy = CreatedBy,",
+				"          SQL_CreatedOn = CreatedOn,",
+				"          SQL_RecordStatus = RecordStatus",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectSQL",
+				"selectSQLColsOnly derive(SQL_RecordStatus = 1) ~> RecrodStatusMakeAsInactive",
+				"RecrodStatusMakeAsInactive alterRow(updateIf(1==1)) ~> UpdateExistingRows",
+				"filterSQLRowsOnly select(mapColumn(",
+				"          SQL_GWBSId,",
+				"          SQL_GWBSLevel,",
+				"          SQL_GWBSLabel,",
+				"          SQL_ProjectId,",
+				"          SQL_CreatedBy,",
+				"          SQL_CreatedOn,",
+				"          SQL_RecordStatus",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectSQLColsOnly",
+				"RecordStatus sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          GWBSId as integer,",
+				"          GWBSLevel as integer,",
+				"          GWBSLabel as string,",
+				"          ProjectId as integer,",
+				"          CreatedBy as string,",
+				"          CreatedOn as timestamp,",
+				"          RecordStatus as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          GWBSLevel,",
+				"          GWBSLabel,",
+				"          ProjectId,",
+				"          CreatedBy,",
+				"          CreatedOn,",
+				"          RecordStatus",
+				"     )) ~> sinkGwbslevelSQL",
+				"UpdateExistingRows sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          GWBSId as integer,",
+				"          GWBSLevel as integer,",
+				"          GWBSLabel as string,",
+				"          ProjectId as integer,",
+				"          CreatedBy as string,",
+				"          CreatedOn as timestamp,",
+				"          RecordStatus as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['GWBSId'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          GWBSId = SQL_GWBSId,",
+				"          GWBSLevel = SQL_GWBSLevel,",
+				"          GWBSLabel = SQL_GWBSLabel,",
+				"          ProjectId = SQL_ProjectId,",
+				"          CreatedBy = SQL_CreatedBy,",
+				"          CreatedOn = SQL_CreatedOn,",
+				"          RecordStatus = SQL_RecordStatus",
+				"     )) ~> sinkSQLUpdate"
+			]
+		}
+	}
+}

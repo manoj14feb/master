@@ -1,0 +1,15 @@
+{
+	"name": "link_Cloud_File_System",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "link_Cloud_File_System",
+		"annotations": [
+			"Linked service for cloud file system"
+		],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"connectionString": "DefaultEndpointsProtocol=https;AccountName=adfclassstorage;EndpointSuffix=core.windows.net;",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDYzRTgwN0RGLTMzNUUtNEYyQy1COThELTY1RTFDODQ5RUFCOF81ZDIxMDM2Yy05ZTZjLTRjZWYtYjliYi01MDQ3NDc0MzEzMGMiDQp9"
+		}
+	}
+}

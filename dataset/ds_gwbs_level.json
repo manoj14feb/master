@@ -1,0 +1,45 @@
+{
+	"name": "ds_gwbs_level",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "link_Cloud_File_System",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "gwbs-level.csv",
+				"container": "import-folder"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "GWBSLevel",
+				"type": "String"
+			},
+			{
+				"name": "GWBSLabel",
+				"type": "String"
+			},
+			{
+				"name": "ProjectId",
+				"type": "String"
+			},
+			{
+				"name": "CreatedBy",
+				"type": "String"
+			},
+			{
+				"name": "CreatedOn",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

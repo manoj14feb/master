@@ -1,0 +1,25 @@
+{
+	"name": "link_File_System",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "link_File_System",
+		"parameters": {
+			"sourcefolderName": {
+				"type": "string"
+			}
+		},
+		"annotations": [
+			"on-prem linked service"
+		],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "@{linkedService().sourcefolderName}",
+			"userId": "desktop-6dad0pi\\manoj",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIzMjUxZjQ4MS04NzNlLTRhM2ItOGNiZi03ZTJlMWY5OTY2ZGQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "on-prem-ir-manoj",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

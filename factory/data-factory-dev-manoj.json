@@ -1,0 +1,25 @@
+{
+	"name": "data-factory-dev-manoj",
+	"properties": {
+		"globalParameters": {
+			"devenv": {
+				"type": "string",
+				"value": "devenv"
+			},
+			"uatenv": {
+				"type": "string",
+				"value": "uatenv"
+			},
+			"prod": {
+				"type": "string",
+				"value": "prod"
+			}
+		}
+	},
+	"location": "uaenorth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "ea3369f4-35e4-4876-99f6-8aa83eb1331c",
+		"tenantId": "9179d01a-e94c-4488-b5f0-4554bc474f8c"
+	}
+}

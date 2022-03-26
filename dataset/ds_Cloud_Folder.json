@@ -1,0 +1,22 @@
+{
+	"name": "ds_Cloud_Folder",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "link_Cloud_File_System",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "import-folder"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

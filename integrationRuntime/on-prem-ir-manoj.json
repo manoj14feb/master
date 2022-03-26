@@ -1,0 +1,7 @@
+{
+	"name": "on-prem-ir-manoj",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "on-prem-ir-manoj"
+	}
+}

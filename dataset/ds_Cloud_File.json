@@ -1,0 +1,32 @@
+{
+	"name": "ds_Cloud_File",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "link_Cloud_File_System",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"sourceFileName": {
+				"type": "string",
+				"defaultValue": "abc"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().sourceFileName",
+					"type": "Expression"
+				},
+				"container": "import-folder"
+			},
+			"columnDelimiter": "|",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
